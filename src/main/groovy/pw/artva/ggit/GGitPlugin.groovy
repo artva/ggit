@@ -24,12 +24,33 @@ package pw.artva.ggit
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.tasks.GitSyncTask
 
 /**
+ * Plugin implementation class.
+ *
  * @author Artur Vakhrameev
  */
 class GGitPlugin implements Plugin<Project> {
 
+    Project project
+
     void apply(final Project project) {
+        this.project = project
+        initConfig()
+        addTasks()
+    }
+
+    def initConfig() {
+        project.extensions.add(GitConfig.EXTENSION_NAME, GitConfig)
+        def config = project.gitConfig
+        config.project(project)
+    }
+
+    def addTasks() {
+        project.task(GitSyncTask.SYNC_TASK_NAME, type: GitSyncTask) {
+            gitConfig = project.gitConfig
+        }
     }
 }

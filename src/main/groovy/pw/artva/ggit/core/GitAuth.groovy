@@ -20,10 +20,12 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core;
+package pw.artva.ggit.core
 
 /**
  * @author Artur Vakhrameev
  */
-public class s {
+class GitAuth {
+    String username
+    String password
 }

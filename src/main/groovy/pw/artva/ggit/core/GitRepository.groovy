@@ -22,55 +22,11 @@
 
 package pw.artva.ggit.core
 
-import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.Project
-
 /**
- * Git configuration class for gradle extension.
- *
  * @author Artur Vakhrameev
  */
-class GitConfig {
-
-    public static final String EXTENSION_NAME = "gitConfig"
-
-    Project project
-    String name
-    GitRepository repository
-    GitAuth auth
-    NamedDomainObjectContainer<GitConfig> subModules
-    GitConfig parent
-
-    GitConfig(String name) {
-        this.name = name
-    }
-
-    GitConfig() {
-    }
-
-    void repository(Closure closure) {
-        repository = new GitRepository()
-        closure.delegate = repository
-        closure()
-    }
-
-    void auth(Closure closure) {
-        auth = new GitAuth()
-        closure.delegate = auth
-        closure()
-    }
-
-    def subModules(final Closure configureClosure) {
-        subModules.configure(configureClosure)
-        subModules.all {
-            delegate.project(this.project)
-            delegate.parent = this
-        }
-    }
-
-    def project(final Project) {
-        this.project = project
-        subModules = project.container(GitConfig)
-    }
-
+class GitRepository {
+    String branch = "master"
+    String remote = "origin"
+    String url = ""
 }

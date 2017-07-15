@@ -24,6 +24,7 @@ package pw.artva.ggit.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import pw.artva.ggit.core.GitConfig
 
 /**
  * Repositories synchronization task.
@@ -34,7 +35,10 @@ class GitSyncTask extends DefaultTask {
 
     public static final String SYNC_TASK_NAME = 'gitSync'
 
+    GitConfig gitConfig
+
     @TaskAction
     def action() {
+
     }
 }
