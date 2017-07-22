@@ -23,11 +23,15 @@
 package pw.artva.ggit.core
 
 /**
+ *
  * @author Artur Vakhrameev
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+final class ConfigUtils {
+
+    static copySetting(GitConfig from, GitConfig to) {
+        from.repository.branch = to.repository.branch
+        from.repository.remote = to.repository.remote
+        from.auth.username = to.auth.username
+        from.auth.password = to.auth.password
+    }
 }

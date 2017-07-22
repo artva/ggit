@@ -30,6 +30,7 @@ package pw.artva.ggit.core
 class PluginConfiguration {
     public static final String EXTENSION_NAME = "ggit"
     boolean defaultFromParent = true
+    boolean defaultForProject = true
     GitConfig gitConfig
 
     void gitConfig(Closure closure) {

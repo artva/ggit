@@ -20,14 +20,26 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.operation
+
+import org.eclipse.jgit.api.TransportCommand
+import pw.artva.ggit.core.GitConfig
 
 /**
+ * Created on 22.07.2017
  * @author Artur Vakhrameev
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+abstract class AbstractTransportOperation extends AbstractOperation {
+
+    AbstractTransportOperation(GitConfig gitConfig, OperationType type) {
+        super(gitConfig, type)
+    }
+
+    @Override
+    protected void configureCommand() {
+        command().setCredentialsProvider(credentials())
+    }
+
+    @Override
+    protected abstract TransportCommand command()
 }

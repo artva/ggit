@@ -20,14 +20,20 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.operation
+
+import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+final class OperationFactory {
+    static Operation create(OperationType operationType, GitConfig config) {
+        switch (operationType) {
+            case OperationType.CLONE:
+                return new CloneOperation(config, operationType)
+            default:
+                throw new IllegalArgumentException("Operation type not supported ${operationType.name}")
+        }
+    }
 }

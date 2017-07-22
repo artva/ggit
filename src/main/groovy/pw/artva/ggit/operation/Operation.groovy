@@ -20,14 +20,13 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.operation
 
 /**
+ * Created on 22.07.2017
  * @author Artur Vakhrameev
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+interface Operation {
+    void execute()
+    void executeAll()
 }

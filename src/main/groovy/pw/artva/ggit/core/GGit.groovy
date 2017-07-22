@@ -24,6 +24,7 @@ package pw.artva.ggit.core
 
 import org.gradle.api.Project
 import pw.artva.ggit.core.PluginConfiguration
+import pw.artva.ggit.operation.OperationFactory
 import pw.artva.ggit.tasks.GitSyncTask
 
 /**
@@ -32,7 +33,7 @@ import pw.artva.ggit.tasks.GitSyncTask
  * @author Artur Vakhrameev
  */
 @Singleton
-class GGit {
+final class GGit {
     private Project project
     private boolean initialized
 

@@ -20,14 +20,28 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.operation
+
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.TransportCommand
+import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+class CloneOperation extends AbstractTransportOperation {
+
+    CloneOperation(GitConfig gitConfig, OperationType type) {
+        super(gitConfig, type)
+    }
+
+    @Override
+    protected TransportCommand command() {
+        def repo = gitConfig.repository
+
+        return Git.cloneRepository()
+                .setDirectory(new File(repo.path))
+                .setURI(repo.remoteUrl)
+                .setBranch(repo.branch)
+    }
 }

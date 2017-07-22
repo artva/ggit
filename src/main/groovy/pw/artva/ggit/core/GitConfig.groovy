@@ -32,31 +32,40 @@ import org.gradle.api.Project
  */
 class GitConfig {
     String name
-    GitRepository repository
-    GitAuth auth
+    GitRepository repository = new GitRepository()
+    GitAuth auth = new GitAuth()
     NamedDomainObjectContainer<GitConfig> subModules
-    GitConfig parent
 
     GitConfig(String name) {
         this.name = name
+        fillDefaultForProject()
     }
 
     GitConfig() {
+        name = GGit.instance.project.name
+        fillDefaultForProject()
+    }
+
+    private fillDefaultForProject() {
+        def mainProject = GGit.instance.project
+        if (mainProject.ggit.defaultForProject) {
+            def project = mainProject.name == name ? mainProject : mainProject.findProject(name)
+            assert project != null, "Incorrect project name: '${name}'."
+            repository.path = project.path
+        }
     }
 
     void repository(Closure closure) {
-        repository = new GitRepository()
         closure.delegate = repository
         closure()
     }
 
     void auth(Closure closure) {
-        auth = new GitAuth()
         closure.delegate = auth
         closure()
     }
 
-    def subModules(final Closure configureClosure) {
+    void subModules(final Closure configureClosure) {
         subModules.configure(configureClosure)
         //children config registration
         subModules.all {
@@ -65,12 +74,8 @@ class GitConfig {
             delegate.parent = this
             //copy some settings from parent
             if (project.ggit.defaultFromParent) {
-                delegate.configureFromParent()
+                ConfigUtils.copySetting(this, delegate)
             }
         }
-    }
-
-    def configureFromParent() {
-        auth = parent.auth
     }
 }
