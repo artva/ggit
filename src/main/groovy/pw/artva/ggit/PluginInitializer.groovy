@@ -20,57 +20,21 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit
 
-import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Plugin
 import org.gradle.api.Project
+import pw.artva.ggit.core.GGit
 
 /**
- * Git configuration class
+ * Plugin starting class.
  *
  * @author Artur Vakhrameev
  */
-class GitConfig {
-    String name
-    GitRepository repository
-    GitAuth auth
-    NamedDomainObjectContainer<GitConfig> subModules
-    GitConfig parent
+class PluginInitializer implements Plugin<Project> {
 
-    GitConfig(String name) {
-        this.name = name
-    }
-
-    GitConfig() {
-    }
-
-    void repository(Closure closure) {
-        repository = new GitRepository()
-        closure.delegate = repository
-        closure()
-    }
-
-    void auth(Closure closure) {
-        auth = new GitAuth()
-        closure.delegate = auth
-        closure()
-    }
-
-    def subModules(final Closure configureClosure) {
-        subModules.configure(configureClosure)
-        //children config registration
-        subModules.all {
-            Project project = GGit.instance.project
-            project.container(GitConfig)
-            delegate.parent = this
-            //copy some settings from parent
-            if (project.ggit.defaultFromParent) {
-                delegate.configureFromParent()
-            }
-        }
-    }
-
-    def configureFromParent() {
-        auth = parent.auth
+    @Override
+    void apply(Project project) {
+        GGit.instance.init()
     }
 }

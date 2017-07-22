@@ -20,37 +20,21 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit
-
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import pw.artva.ggit.core.GitConfig
-import pw.artva.ggit.tasks.GitSyncTask
+package pw.artva.ggit.core
 
 /**
- * Plugin implementation class.
+ * Main plugin configuration class
  *
  * @author Artur Vakhrameev
  */
-class GGitPlugin implements Plugin<Project> {
+class PluginConfiguration {
+    public static final String EXTENSION_NAME = "ggit"
+    boolean defaultFromParent = true
+    GitConfig gitConfig
 
-    Project project
-
-    void apply(final Project project) {
-        this.project = project
-        initConfig()
-        addTasks()
-    }
-
-    def initConfig() {
-        project.extensions.add(GitConfig.EXTENSION_NAME, GitConfig)
-        def config = project.gitConfig
-        config.project(project)
-    }
-
-    def addTasks() {
-        project.task(GitSyncTask.SYNC_TASK_NAME, type: GitSyncTask) {
-            gitConfig = project.gitConfig
-        }
+    void gitConfig(Closure closure) {
+        gitConfig = new GitConfig()
+        closure.delegate = gitConfig
+        closure.closure()
     }
 }

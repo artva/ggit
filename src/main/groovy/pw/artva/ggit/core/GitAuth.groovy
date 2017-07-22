@@ -26,6 +26,6 @@ package pw.artva.ggit.core
  * @author Artur Vakhrameev
  */
 class GitAuth {
-    String username
-    String password
+    String username = ''
+    String password = ''
 }

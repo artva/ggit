@@ -26,7 +26,7 @@ package pw.artva.ggit.core
  * @author Artur Vakhrameev
  */
 class GitRepository {
-    String branch = "master"
-    String remote = "origin"
-    String url = ""
+    String branch = 'master'
+    String remote = 'origin'
+    String url = ''
 }
