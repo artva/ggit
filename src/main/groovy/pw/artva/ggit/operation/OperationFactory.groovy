@@ -27,13 +27,17 @@ import pw.artva.ggit.core.GitConfig
 /**
  * @author Artur Vakhrameev
  */
-final class OperationFactory {
-    static Operation create(OperationType operationType, GitConfig config) {
-        switch (operationType) {
+@Singleton
+class OperationFactory {
+
+    Operation create(OperationType type, GitConfig config, boolean chain) {
+        switch (type) {
             case OperationType.CLONE:
-                return new CloneOperation(config, operationType)
+                return new CloneOperation(config, chain)
+            case OperationType.SYNC:
+                return new SyncOperation(config, chain)
             default:
-                throw new IllegalArgumentException("Operation type not supported ${operationType.name}")
+                throw new IllegalArgumentException("Operation type not supported ${type.name}")
         }
     }
 }

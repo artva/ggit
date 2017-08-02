@@ -23,9 +23,8 @@
 package pw.artva.ggit.core
 
 import org.gradle.api.Project
-import pw.artva.ggit.core.PluginConfiguration
-import pw.artva.ggit.operation.OperationFactory
-import pw.artva.ggit.tasks.GitSyncTask
+import pw.artva.ggit.operation.OperationType
+import pw.artva.ggit.tasks.GitTask
 
 /**
  * Main plugin class.
@@ -54,8 +53,12 @@ final class GGit {
     }
 
     def addTasks() {
-        project.task(GitSyncTask.SYNC_TASK_NAME, type: GitSyncTask) {
-            gitConfig = project.ggit.gitConfig
+        //adding tasks for all operation type
+        OperationType.values().each {
+            project.task("git${it.name}", type: GitTask) {
+                operationType = it
+                gitConfig = project.gitConfig
+            }
         }
     }
 

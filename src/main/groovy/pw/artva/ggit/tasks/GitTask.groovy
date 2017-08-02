@@ -20,11 +20,27 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation
+package pw.artva.ggit.tasks
+
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
+import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.operation.OperationFactory
+import pw.artva.ggit.operation.OperationType
 
 /**
+ * Repositories synchronization task.
+ *
  * @author Artur Vakhrameev
  */
-interface Operation {
-    void execute()
+class GitTask extends DefaultTask {
+
+    OperationType operationType
+    GitConfig gitConfig
+
+    @TaskAction
+    void action() {
+        def operation = OperationFactory.instance.create(operationType, gitConfig, false)
+        operation.execute()
+    }
 }

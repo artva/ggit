@@ -26,7 +26,7 @@ package pw.artva.ggit.operation
  * @author Artur Vakhrameev
  */
 enum OperationType {
-    SYNC('gitSync'), CLONE('clone')
+    SYNC('Sync'), CLONE('Clone')
 
     OperationType(String name) {
         this.name = name

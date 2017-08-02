@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation;
+package pw.artva.ggit.exception
 
 /**
- *
  * @author Artur Vakhrameev
  */
-public class OperationUtils {
-
+class RepoNotExistException extends RuntimeException {
 }

@@ -20,25 +20,16 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.tasks
+package pw.artva.ggit.operation
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.core.GitRepository
 
 /**
- * Repositories synchronization task.
- *
  * @author Artur Vakhrameev
  */
-class GitSyncTask extends DefaultTask {
+final class GitUtils {
 
-    public static final String SYNC_TASK_NAME = 'gitSync'
-
-    GitConfig gitConfig
-
-    @TaskAction
-    def action() {
+    static void validateRepository(GitRepository repository) {
 
     }
 }

@@ -29,19 +29,20 @@ import pw.artva.ggit.core.GitConfig
 /**
  * @author Artur Vakhrameev
  */
-class CloneOperation extends AbstractTransportOperation {
+class CloneOperation extends SimpleTransportOperation {
 
-    CloneOperation(GitConfig gitConfig, OperationType type) {
-        super(gitConfig, type)
+    CloneOperation(GitConfig gitConfig, boolean chain) {
+        super(gitConfig, chain)
     }
 
     @Override
-    protected TransportCommand command() {
-        def repo = gitConfig.repository
+    protected TransportCommand createCommand(GitConfig config) {
+        def repo = config.repository
 
         return Git.cloneRepository()
                 .setDirectory(new File(repo.path))
                 .setURI(repo.remoteUrl)
                 .setBranch(repo.branch)
     }
+
 }

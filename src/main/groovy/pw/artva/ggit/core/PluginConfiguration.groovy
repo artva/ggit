@@ -31,6 +31,7 @@ class PluginConfiguration {
     public static final String EXTENSION_NAME = "ggit"
     boolean defaultFromParent = true
     boolean defaultForProject = true
+    boolean cloneIfNotExists = true
     GitConfig gitConfig
 
     void gitConfig(Closure closure) {

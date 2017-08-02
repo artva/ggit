@@ -22,46 +22,16 @@
 
 package pw.artva.ggit.operation
 
-import org.eclipse.jgit.api.GitCommand
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
-import pw.artva.ggit.core.GGit
+import groovy.transform.Immutable
 import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
+@Immutable
 abstract class AbstractOperation implements Operation {
 
-    protected final GitConfig gitConfig
-    protected final OperationType type
+    protected GitConfig gitConfig
+    protected boolean chain
 
-    AbstractOperation(GitConfig gitConfig, OperationType type) {
-        this.gitConfig = gitConfig
-        this.type = type
-    }
-
-    @Override
-    void execute() {
-        configureCommand()
-        command().call()
-    }
-
-    @Override
-    void executeAll() {
-        execute()
-        gitConfig.subModules.each {
-            //create and execute child operation
-           OperationFactory.create(this.type, it).execute()
-        }
-    }
-
-    protected UsernamePasswordCredentialsProvider credentials() {
-        def auth = gitConfig.auth
-        return new UsernamePasswordCredentialsProvider(auth.username, auth.password)
-    }
-
-    protected void configureCommand() {
-    }
-
-    protected abstract GitCommand command()
 }

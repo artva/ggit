@@ -22,24 +22,38 @@
 
 package pw.artva.ggit.operation
 
-import org.eclipse.jgit.api.TransportCommand
+import org.eclipse.jgit.api.GitCommand
 import pw.artva.ggit.core.GitConfig
 
 /**
- * Created on 22.07.2017
  * @author Artur Vakhrameev
  */
-abstract class AbstractTransportOperation extends AbstractOperation {
+abstract class SimpleOperation<T> extends AbstractOperation {
 
-    AbstractTransportOperation(GitConfig gitConfig, OperationType type) {
-        super(gitConfig, type)
+    SimpleOperation(GitConfig gitConfig, boolean chain) {
+        super(gitConfig, chain)
     }
 
     @Override
-    protected void configureCommand() {
-        command().setCredentialsProvider(credentials())
+    void execute() {
+        if (chain) {
+            def commands = [command(gitConfig)]
+            fillChildren(commands, gitConfig)
+            commands.each {it.call()}
+        } else {
+            command(gitConfig).call()
+        }
     }
 
-    @Override
-    protected abstract TransportCommand command()
+    protected void fillChildren(List<GitCommand<T>> commands, GitConfig config) {
+        //adds children recursively
+        config.subModules.all {
+            commands.add(command(it))
+            it.subModules.all {
+                fillChildren(commands, it)
+            }
+        }
+    }
+
+    protected abstract GitCommand<T> command(GitConfig config)
 }
