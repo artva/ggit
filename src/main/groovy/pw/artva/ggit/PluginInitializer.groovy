@@ -35,6 +35,6 @@ class PluginInitializer implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        GGit.instance.init()
+        GGit.instance.init(project)
     }
 }

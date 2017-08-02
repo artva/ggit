@@ -35,7 +35,8 @@ class PluginConfiguration {
 
     void gitConfig(Closure closure) {
         gitConfig = new GitConfig()
+        gitConfig.subModules = GGit.instance.project.container(GitConfig)
         closure.delegate = gitConfig
-        closure.closure()
+        closure()
     }
 }

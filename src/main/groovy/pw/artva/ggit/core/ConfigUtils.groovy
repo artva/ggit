@@ -28,10 +28,10 @@ package pw.artva.ggit.core
  */
 final class ConfigUtils {
 
-    static copySetting(GitConfig from, GitConfig to) {
-        from.repository.branch = to.repository.branch
-        from.repository.remote = to.repository.remote
-        from.auth.username = to.auth.username
-        from.auth.password = to.auth.password
+    static copyForNullSettings(GitConfig to, GitConfig from) {
+        to.repository.branch = to.repository.branch ?: from.repository.branch
+        to.repository.remote = to.repository.remote ?: from.repository.remote
+        to.auth.username = to.auth.username ?: from.auth.username
+        to.auth.password = to.auth.password ?: from.auth.password
     }
 }

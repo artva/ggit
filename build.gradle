@@ -14,7 +14,9 @@ dependencies {
     compile 'org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r'
     compile gradleApi()
     compile localGroovy()
-    
+
     testCompile gradleTestKit()
-    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile ('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
 }

@@ -70,11 +70,10 @@ class GitConfig {
         //children config registration
         subModules.all {
             Project project = GGit.instance.project
-            project.container(GitConfig)
-            delegate.parent = this
+            delegate.subModules = project.container(GitConfig)
             //copy some settings from parent
             if (project.ggit.defaultFromParent) {
-                ConfigUtils.copySetting(this, delegate)
+                ConfigUtils.copyForNullSettings(delegate, this)
             }
         }
     }

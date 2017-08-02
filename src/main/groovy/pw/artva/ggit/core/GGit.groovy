@@ -55,7 +55,7 @@ final class GGit {
 
     def addTasks() {
         project.task(GitSyncTask.SYNC_TASK_NAME, type: GitSyncTask) {
-            gitConfig = project.gitConfig
+            gitConfig = project.ggit.gitConfig
         }
     }
 

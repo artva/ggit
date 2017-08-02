@@ -1,3 +1,10 @@
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import pw.artva.ggit.PluginInitializer
+import pw.artva.ggit.core.GitConfig
+import spock.lang.Specification
+
 /*
  * Copyright (c) 2017 Artur Vakhrameev
  *
@@ -23,5 +30,81 @@
 /**
  * @author Artur Vakhrameev
  */
-class GGPluginTest extends GroovyTestCase{
+class GGPluginTest extends Specification {
+
+    @Rule
+    final TemporaryFolder testProjDir = new TemporaryFolder()
+    File buildFile
+
+    def setup() {
+        buildFile = testProjDir.newFile('build.gradle')
+    }
+
+    def "Ggit extension is filling correctly from build file"() {
+        setup:
+        def project = ProjectBuilder.builder()
+                .withProjectDir(testProjDir.root)
+                .build()
+
+        when: 'plugin applied'
+        project.pluginManager.apply PluginInitializer
+
+        then: 'extension defined'
+        assert project.ggit != null
+
+        when: 'plugin configured'
+        //building subproject
+        def subProject = ProjectBuilder.builder()
+                .withName('subProj')
+                .withParent(project)
+                .build()
+
+        project.ggit {
+            gitConfig {
+                repository {
+                    branch = branchParam
+                    remote = remoteParam
+                }
+                auth {
+                    username = usernameParam
+                    password = passwordParam
+                }
+                subModules {
+                    subProj {
+                        repository {
+                            branch = subBranchParam
+                            remote = subRemoteParam
+                        }
+                        auth {
+                            password = subPasswordParam
+                        }
+                    }
+                }
+            }
+        }
+        GitConfig result = project?.ggit?.gitConfig
+        GitConfig subModule = result?.subModules?.first()
+
+        then: 'plugin configuration stores all user settings'
+        assert result
+        assert result?.auth?.username == usernameParam
+        assert result?.auth?.password == passwordParam
+        assert result?.repository?.branch == branchParam
+        assert result?.repository?.remote == remoteParam
+
+        assert subModule
+        assert subModule?.auth?.username == subUsernameParam
+        assert subModule?.auth?.password == subPasswordParam
+
+        where:
+        usernameParam << ['artva']
+        passwordParam << ['12345']
+        remoteParam << ['remote param']
+        branchParam << ['branch param']
+        subUsernameParam << ['sub artva']
+        subPasswordParam << ['sub 12345']
+        subRemoteParam << ['sub remote param']
+        subBranchParam << ['sub branch param']
+    }
+
 }
