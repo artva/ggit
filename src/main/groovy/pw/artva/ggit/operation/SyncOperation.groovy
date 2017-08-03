@@ -22,8 +22,10 @@
 
 package pw.artva.ggit.operation
 
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.util.FS
 import org.gradle.api.Project
 import pw.artva.ggit.core.GGit
 import pw.artva.ggit.core.GitConfig
@@ -56,19 +58,52 @@ class SyncOperation extends AbstractOperation {
             //project directory exist and not empty
             syncRepo(path, config.repository)
         } else if (mainProject.ggit.cloneIfNotExists) {
-
+            //start clone repository
             factory.create(OperationType.CLONE, config, false).execute()
         } else {
             throw new RepoNotExistException()
         }
     }
 
-    void syncRepo(File path, GitRepository repository) {
-
+    void syncRepo(File path, GitRepository repoConfig) {
         //get repository instance
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder()
         File gitDir = new File("${path.path}/.git")
         Repository repo = repositoryBuilder.setGitDir(gitDir).build()
+
+        //validate repository exists
+        if (!repo.getObjectDatabase().exists() || repo.findRef('HEAD') == null) {
+            throw new RepoNotExistException()
+        }
+
+        //remote
+        def remoteUrl = repo.config.getString('remote', repoConfig.remote, 'url')
+        if (remoteUrl == null) {
+            if (allowRemoteAdd) {
+                repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
+            } else {
+                throw new RemoteNotFoundException()
+            }
+        } else if (remoteUrl != repoConfig) {
+            if (allowUrlRewrite) {
+                repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
+            } else {
+                throw new InvalidRemoteUrlException()
+            }
+        }
+
+        //branch
+        if (repo.branch != repoConfig.branch) {
+            if (allowCheckout) {
+                //repo branch not equals and checkout allowed
+                Git.open(path).checkout()
+                .setCreateBranch(branchCreateAllowed)
+                .setName(repoConfig.branch)
+                .setStartPoint("${repoConfig.remote}/${repoConfig.branch}")
+                .call();
+            }
+        }
+
 
     }
 }

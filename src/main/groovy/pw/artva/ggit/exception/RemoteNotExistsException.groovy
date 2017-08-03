@@ -20,25 +20,10 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation
-
-import org.eclipse.jgit.lib.Repository
-import pw.artva.ggit.core.GitRepository
-import pw.artva.ggit.exception.RemoteNotExistsException
-import pw.artva.ggit.exception.RepoNotExistException
+package pw.artva.ggit.exception
 
 /**
  * @author Artur Vakhrameev
  */
-final class GitUtils {
-
-    static void validateRepository(Repository repo, GitRepository repoConfig) {
-        if (!repo.getObjectDatabase().exists() || repo.findRef('HEAD') == null) {
-            throw new RepoNotExistException()
-        }
-
-        if (!repo.remoteNames.contains(repoConfig.remote)) {
-            throw new RemoteNotExistsException()
-        }
-    }
+class RemoteNotExistsException extends RuntimeException {
 }
