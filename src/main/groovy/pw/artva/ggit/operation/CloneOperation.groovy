@@ -29,7 +29,7 @@ import pw.artva.ggit.core.GitConfig
 /**
  * @author Artur Vakhrameev
  */
-class CloneOperation extends SimpleTransportOperation {
+class CloneOperation extends SimpleAuthorizedOperation {
 
     CloneOperation(GitConfig gitConfig, boolean chain) {
         super(gitConfig, chain)

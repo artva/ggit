@@ -36,6 +36,10 @@ class OperationFactory {
                 return new CloneOperation(config, chain)
             case OperationType.SYNC:
                 return new SyncOperation(config, chain)
+            case OperationType.CHECKOUT:
+                return new CheckoutOperation(config, chain)
+            case OperationType.PULL:
+                return new PullOperation(config, chain)
             default:
                 throw new IllegalArgumentException("Operation type not supported ${type.name}")
         }

@@ -20,10 +20,32 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.exception
+package pw.artva.ggit.operation
+
+import org.eclipse.jgit.api.GitCommand
+import org.eclipse.jgit.api.TransportCommand
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-class RemoteNotExistsException extends RuntimeException {
+abstract class SimpleAuthorizedOperation extends SimpleOperation {
+
+    SimpleAuthorizedOperation(GitConfig gitConfig, boolean chain) {
+        super(gitConfig, chain)
+    }
+
+    @Override
+    GitCommand command(GitConfig config) {
+        return createCommand(config)
+                .setCredentialsProvider(credentials(config))
+    }
+
+    protected UsernamePasswordCredentialsProvider credentials(GitConfig config) {
+        def auth = config.auth
+        return new UsernamePasswordCredentialsProvider(auth.username, auth.password)
+    }
+
+    protected abstract TransportCommand createCommand(GitConfig config)
 }

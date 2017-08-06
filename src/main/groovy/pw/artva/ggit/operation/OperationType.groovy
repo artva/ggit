@@ -26,7 +26,7 @@ package pw.artva.ggit.operation
  * @author Artur Vakhrameev
  */
 enum OperationType {
-    SYNC('Sync'), CLONE('Clone')
+    SYNC('Sync'), CLONE('Clone'), CHECKOUT('Checkout'), PULL('Pull')
 
     OperationType(String name) {
         this.name = name

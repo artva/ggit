@@ -22,30 +22,23 @@
 
 package pw.artva.ggit.operation
 
-import org.eclipse.jgit.api.GitCommand
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-abstract class SimpleTransportOperation extends SimpleOperation {
+class PullOperation extends SimpleAuthorizedOperation {
 
-    SimpleTransportOperation(GitConfig gitConfig, boolean chain) {
+    PullOperation(GitConfig gitConfig, boolean chain) {
         super(gitConfig, chain)
     }
 
     @Override
-    GitCommand command(GitConfig config) {
-        return createCommand(config)
-                .setCredentialsProvider(credentials(config))
+    protected TransportCommand createCommand(GitConfig config) {
+        def dir = GitUtils.getProjectDirByName(config.name)
+        return Git.open(dir)
+                .pull()
     }
-
-    protected UsernamePasswordCredentialsProvider credentials(GitConfig config) {
-        def auth = config.auth
-        return new UsernamePasswordCredentialsProvider(auth.username, auth.password)
-    }
-
-    protected abstract TransportCommand createCommand(GitConfig config)
 }

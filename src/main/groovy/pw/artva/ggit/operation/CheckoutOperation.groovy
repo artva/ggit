@@ -20,10 +20,30 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.exception
+package pw.artva.ggit.operation
+
+import org.eclipse.jgit.api.CreateBranchCommand
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.GitCommand
+import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-class RepoNotExistException extends RuntimeException {
+class CheckoutOperation extends SimpleOperation {
+
+    CheckoutOperation(GitConfig gitConfig, boolean chain) {
+        super(gitConfig, chain)
+    }
+
+    @Override
+    protected GitCommand command(GitConfig config) {
+        def dir = GitUtils.getProjectDirByName(config.name)
+
+        return Git.open(dir).checkout()
+                .setCreateBranch(true)
+                .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+                .setName(config.branch)
+                .setStartPoint("${config.remote}/${config.branch}")
+    }
 }

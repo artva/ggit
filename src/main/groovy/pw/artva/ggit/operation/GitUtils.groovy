@@ -22,23 +22,17 @@
 
 package pw.artva.ggit.operation
 
-import org.eclipse.jgit.lib.Repository
-import pw.artva.ggit.core.GitRepository
-import pw.artva.ggit.exception.RemoteNotExistsException
-import pw.artva.ggit.exception.RepoNotExistException
+import pw.artva.ggit.core.GGit
 
 /**
  * @author Artur Vakhrameev
  */
 final class GitUtils {
 
-    static void validateRepository(Repository repo, GitRepository repoConfig) {
-        if (!repo.getObjectDatabase().exists() || repo.findRef('HEAD') == null) {
-            throw new RepoNotExistException()
-        }
+    static File getProjectDirByName(String name) {
+        def project = GGit.instance.project.findProject(name)
+        assert project != null: "Project ${name} not found"
 
-        if (!repo.remoteNames.contains(repoConfig.remote)) {
-            throw new RemoteNotExistsException()
-        }
+        return project.projectDir
     }
 }

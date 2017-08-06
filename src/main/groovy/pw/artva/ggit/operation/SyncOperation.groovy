@@ -22,15 +22,12 @@
 
 package pw.artva.ggit.operation
 
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.util.FS
 import org.gradle.api.Project
 import pw.artva.ggit.core.GGit
 import pw.artva.ggit.core.GitConfig
 import pw.artva.ggit.core.GitRepository
-import pw.artva.ggit.exception.RepoNotExistException
 
 /**
  * @author Artur Vakhrameev
@@ -46,7 +43,18 @@ class SyncOperation extends AbstractOperation {
 
     @Override
     void execute() {
+        if (chain) {
+            recursiveSync(gitConfig)
+        } else {
+            sync(gitConfig)
+        }
+    }
 
+    void recursiveSync(GitConfig config) {
+        sync(config)
+        config.subModules.each {
+            recursiveSync(config)
+        }
     }
 
     void sync(GitConfig config) {
@@ -56,54 +64,41 @@ class SyncOperation extends AbstractOperation {
 
         if (path.exists() && path.list() != null) {
             //project directory exist and not empty
-            syncRepo(path, config.repository)
-        } else if (mainProject.ggit.cloneIfNotExists) {
-            //start clone repository
-            factory.create(OperationType.CLONE, config, false).execute()
+            syncSingleRepo(path, config)
         } else {
-            throw new RepoNotExistException()
+            assert allowRepoClone: "Repository for project '${config.name}' not exists and cloning not allowed."
+            factory.create(OperationType.CLONE, config, false).execute()
         }
     }
 
-    void syncRepo(File path, GitRepository repoConfig) {
+    void syncSingleRepo(File path, GitConfig config) {
+        GitRepository repoConfig = config.repository
         //get repository instance
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder()
         File gitDir = new File("${path.path}/.git")
         Repository repo = repositoryBuilder.setGitDir(gitDir).build()
 
-        //validate repository exists
-        if (!repo.getObjectDatabase().exists() || repo.findRef('HEAD') == null) {
-            throw new RepoNotExistException()
-        }
+        assert repo.getObjectDatabase().exists() && repo.findRef('HEAD') != null:
+                "Invalid git repository in project '${config.name}'"
 
         //remote
         def remoteUrl = repo.config.getString('remote', repoConfig.remote, 'url')
         if (remoteUrl == null) {
-            if (allowRemoteAdd) {
-                repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
-            } else {
-                throw new RemoteNotFoundException()
-            }
+            assert allowRemoteAdd: ""
+            repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
         } else if (remoteUrl != repoConfig) {
-            if (allowUrlRewrite) {
-                repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
-            } else {
-                throw new InvalidRemoteUrlException()
-            }
+            assert allowUrlRewrite: ""
+            repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
         }
 
         //branch
         if (repo.branch != repoConfig.branch) {
-            if (allowCheckout) {
-                //repo branch not equals and checkout allowed
-                Git.open(path).checkout()
-                .setCreateBranch(branchCreateAllowed)
-                .setName(repoConfig.branch)
-                .setStartPoint("${repoConfig.remote}/${repoConfig.branch}")
-                .call();
-            }
+            assert allowCheckout: "Repository for project ${config.name} " +
+                    "is currentyly on branch '${repo.branch}' and checkout not allowed."
+            factory.create(OperationType.CHECKOUT, config, false).execute()
         }
 
-
+        //pull
+        factory.create(OperationType.PULL, config, false).execute()
     }
 }
