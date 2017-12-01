@@ -33,11 +33,18 @@ class PluginConfiguration {
     boolean defaultForProject = true
     boolean cloneIfNotExists = true
     GitConfig gitConfig
+    SyncConfig sync
 
     void gitConfig(Closure closure) {
         gitConfig = new GitConfig()
         gitConfig.subModules = GGit.instance.project.container(GitConfig)
         closure.delegate = gitConfig
+        closure()
+    }
+
+    void sync(Closure closure) {
+        sync = new SyncConfig()
+        closure.delegate = sync
         closure()
     }
 }

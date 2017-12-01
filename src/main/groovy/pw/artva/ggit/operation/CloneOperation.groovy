@@ -31,12 +31,12 @@ import pw.artva.ggit.core.GitConfig
  */
 class CloneOperation extends SimpleAuthorizedOperation {
 
-    CloneOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    CloneOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
-    protected TransportCommand createCommand(GitConfig config) {
+    protected TransportCommand transportCommand(GitConfig config) {
         def repo = config.repository
 
         return Git.cloneRepository()

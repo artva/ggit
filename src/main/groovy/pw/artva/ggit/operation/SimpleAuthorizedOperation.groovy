@@ -32,13 +32,13 @@ import pw.artva.ggit.core.GitConfig
  */
 abstract class SimpleAuthorizedOperation extends SimpleOperation {
 
-    SimpleAuthorizedOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    SimpleAuthorizedOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
     GitCommand command(GitConfig config) {
-        return createCommand(config)
+        return transportCommand(config)
                 .setCredentialsProvider(credentials(config))
     }
 
@@ -47,5 +47,5 @@ abstract class SimpleAuthorizedOperation extends SimpleOperation {
         return new UsernamePasswordCredentialsProvider(auth.username, auth.password)
     }
 
-    protected abstract TransportCommand createCommand(GitConfig config)
+    protected abstract TransportCommand transportCommand(GitConfig config)
 }

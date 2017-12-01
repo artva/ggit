@@ -22,26 +22,38 @@
 
 package pw.artva.ggit.operation
 
+import org.eclipse.jgit.api.Git
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import pw.artva.ggit.AbstractITSpecification
 import pw.artva.ggit.core.GitConfig
+import spock.lang.Specification
+
 
 /**
  * @author Artur Vakhrameev
  */
-@Singleton
-class OperationFactory {
+class CloneOperationSpecification extends AbstractITSpecification {
 
-    Operation create(OperationType type, GitConfig config, boolean chain) {
-        switch (type) {
-            case OperationType.CLONE:
-                return new CloneOperation(config, chain)
-            case OperationType.SYNC:
-                return new SyncOperation(config, chain)
-            case OperationType.CHECKOUT:
-                return new CheckoutOperation(config, chain)
-            case OperationType.PULL:
-                return new PullOperation(config, chain)
-            default:
-                throw new IllegalArgumentException("Operation type not supported ${type.name}")
+    Git remoteRepo
+
+    def setup() {
+        remoteRepo = newRepository('remoteRepo')
+    }
+
+    def "Clone operation check"() {
+        setup:
+        def local = project.projectDir
+        def config = project.ggit.gitConfig
+        config.repository {
+            path = local.path
+            remoteUrl = remoteRepo.repository.directory.path
+            remote = 'origin'
         }
+        when:
+        new CloneOperation(config, false).execute()
+
+        then:
+        Git.open(local)
     }
 }

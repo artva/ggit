@@ -20,20 +20,39 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.tasks
 
-import javafx.scene.Parent
+import org.gradle.api.DefaultTask
+import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.operation.CheckoutOperation
+import pw.artva.ggit.operation.CloneOperation
+import pw.artva.ggit.operation.Operation
+import pw.artva.ggit.operation.OperationType
+import pw.artva.ggit.operation.PullOperation
+import pw.artva.ggit.operation.SyncOperation
 
 /**
- *
  * @author Artur Vakhrameev
  */
-final class ConfigUtils {
+abstract class AbstractOperationTask extends DefaultTask {
 
-    static copyForNullSettings(GitConfig to, GitConfig from) {
-        to.repository.branch = to.repository.branch ?: from.repository.branch
-        to.repository.remote = to.repository.remote ?: from.repository.remote
-        to.auth.username = to.auth.username ?: from.auth.username
-        to.auth.password = to.auth.password ?: from.auth.password
+    OperationType operationType
+    GitConfig gitConfig
+
+    abstract void action()
+
+    protected Operation buildOperation(GitConfig config) {
+        switch (operationType) {
+            case OperationType.CLONE:
+                return new CloneOperation(config)
+            case OperationType.SYNC:
+                return new SyncOperation(config)
+            case OperationType.CHECKOUT:
+                return new CheckoutOperation(config)
+            case OperationType.PULL:
+                return new PullOperation(config)
+            default:
+                throw new IllegalArgumentException("Operation type not supported ${operationType.name}")
+        }
     }
 }

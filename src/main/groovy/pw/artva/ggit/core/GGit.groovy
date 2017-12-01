@@ -24,7 +24,7 @@ package pw.artva.ggit.core
 
 import org.gradle.api.Project
 import pw.artva.ggit.operation.OperationType
-import pw.artva.ggit.tasks.GitTask
+import pw.artva.ggit.tasks.SignleOperationTask
 
 /**
  * Main plugin class.
@@ -55,9 +55,10 @@ final class GGit {
     def addTasks() {
         //adding tasks for all operation type
         OperationType.values().each {
-            project.task("git${it.name}", type: GitTask) {
-                operationType = it
-                gitConfig = project.gitConfig
+            def type = it
+            project.task("git${it.name}", type: SignleOperationTask) {
+                operationType = type
+                gitConfig = project.ggit.gitConfig
             }
         }
     }

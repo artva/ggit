@@ -22,6 +22,8 @@
 
 package pw.artva.ggit.operation
 
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import pw.artva.ggit.core.GGit
 
 /**
@@ -29,10 +31,14 @@ import pw.artva.ggit.core.GGit
  */
 final class GitUtils {
 
-    static File getProjectDirByName(String name) {
-        def project = GGit.instance.project.findProject(name)
-        assert project != null: "Project ${name} not found"
+    static Repository getRepository(File path) {
+        FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder()
+        File gitDir = new File("${path.path}/.git")
+        Repository repo = repositoryBuilder.setGitDir(gitDir).build()
 
-        return project.projectDir
+        assert repo.getObjectDatabase().exists() && repo.findRef('HEAD') != null:
+                "Invalid git repository in '${path.path}'"
+
+        return repo
     }
 }

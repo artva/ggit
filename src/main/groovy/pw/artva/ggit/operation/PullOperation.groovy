@@ -22,6 +22,7 @@
 
 package pw.artva.ggit.operation
 
+import groovy.transform.Immutable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import pw.artva.ggit.core.GitConfig
@@ -31,14 +32,13 @@ import pw.artva.ggit.core.GitConfig
  */
 class PullOperation extends SimpleAuthorizedOperation {
 
-    PullOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    PullOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
-    protected TransportCommand createCommand(GitConfig config) {
-        def dir = GitUtils.getProjectDirByName(config.name)
-        return Git.open(dir)
+    protected TransportCommand transportCommand(GitConfig config) {
+        return Git.open(config.repository.dir)
                 .pull()
     }
 }

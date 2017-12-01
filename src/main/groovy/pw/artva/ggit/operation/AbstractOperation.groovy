@@ -22,16 +22,17 @@
 
 package pw.artva.ggit.operation
 
-import groovy.transform.Immutable
 import pw.artva.ggit.core.GitConfig
 
 /**
  * @author Artur Vakhrameev
  */
-@Immutable
 abstract class AbstractOperation implements Operation {
 
-    protected GitConfig gitConfig
-    protected boolean chain
+    protected final GitConfig gitConfig
+
+    public AbstractOperation(GitConfig gitConfig) {
+        this.gitConfig = gitConfig
+    }
 
 }

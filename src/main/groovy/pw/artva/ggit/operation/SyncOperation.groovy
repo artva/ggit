@@ -23,82 +23,70 @@
 package pw.artva.ggit.operation
 
 import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.api.Project
 import pw.artva.ggit.core.GGit
 import pw.artva.ggit.core.GitConfig
 import pw.artva.ggit.core.GitRepository
+import pw.artva.ggit.core.SyncConfig
 
 /**
  * @author Artur Vakhrameev
  */
 class SyncOperation extends AbstractOperation {
 
-    private final OperationFactory factory = OperationFactory.instance
     private final Project mainProject = GGit.instance.project
+    private SyncConfig syncConfig = mainProject.ggit.sync
 
-    SyncOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    SyncOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
     void execute() {
-        if (chain) {
-            recursiveSync(gitConfig)
-        } else {
-            sync(gitConfig)
-        }
-    }
-
-    void recursiveSync(GitConfig config) {
-        sync(config)
-        config.subModules.each {
-            recursiveSync(config)
-        }
+        sync(gitConfig)
     }
 
     void sync(GitConfig config) {
-        //get project dir by name
-        def project = mainProject.findProject(config.name)
-        def path = project.projectDir
+        def dir = config.repository.dir
 
-        if (path.exists() && path.list() != null) {
+        if (dir.exists() && dir.list() != null) {
             //project directory exist and not empty
-            syncSingleRepo(path, config)
+            syncSingleRepo(dir, config)
         } else {
-            assert allowRepoClone: "Repository for project '${config.name}' not exists and cloning not allowed."
-            factory.create(OperationType.CLONE, config, false).execute()
+            assert syncConfig.allowRepoClone: "There isn't repository in '${dir.path}' " +
+                    "and cloning not allowed."
+            new CloneOperation(config).execute()
         }
     }
 
-    void syncSingleRepo(File path, GitConfig config) {
+    void syncSingleRepo(File dir, GitConfig config) {
+        Repository repo = GitUtils.getRepository(dir)
+        setupRemote(repo, config)
+        setupBranch(repo, config)
+        new PullOperation(config).execute()
+    }
+
+    void setupRemote(Repository repo, GitConfig config) {
         GitRepository repoConfig = config.repository
-        //get repository instance
-        FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder()
-        File gitDir = new File("${path.path}/.git")
-        Repository repo = repositoryBuilder.setGitDir(gitDir).build()
-
-        assert repo.getObjectDatabase().exists() && repo.findRef('HEAD') != null:
-                "Invalid git repository in project '${config.name}'"
-
         //remote
         def remoteUrl = repo.config.getString('remote', repoConfig.remote, 'url')
         if (remoteUrl == null) {
-            assert allowRemoteAdd: ""
+            assert syncConfig.allowRemoteAdd: "Remote ${repoConfig.remote} not exists and " +
+                    "remote adding not allowed."
             repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
-        } else if (remoteUrl != repoConfig) {
-            assert allowUrlRewrite: ""
+        } else if (remoteUrl != repoConfig.remoteUrl) {
+            assert syncConfig.allowUrlRewrite: "Remote ${repoConfig.remote} is currently configured for " +
+                    "url: '${remoteUrl}' and url rewritting not allowed."
             repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
         }
+    }
 
+    void setupBranch(Repository repo, GitConfig config) {
         //branch
-        if (repo.branch != repoConfig.branch) {
-            assert allowCheckout: "Repository for project ${config.name} " +
+        if (repo.branch != config.repository.branch) {
+            assert syncConfig.allowCheckout: "Repository for project ${config.name} " +
                     "is currentyly on branch '${repo.branch}' and checkout not allowed."
-            factory.create(OperationType.CHECKOUT, config, false).execute()
+            new CheckoutOperation(config).execute()
         }
-
-        //pull
-        factory.create(OperationType.PULL, config, false).execute()
     }
 }

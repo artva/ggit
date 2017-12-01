@@ -38,21 +38,11 @@ class GitConfig {
 
     GitConfig(String name) {
         this.name = name
-        fillDefaultForProject()
     }
 
     GitConfig() {
-        name = GGit.instance.project.name
-        fillDefaultForProject()
-    }
-
-    private fillDefaultForProject() {
-        def mainProject = GGit.instance.project
-        if (mainProject.ggit.defaultForProject) {
-            def project = mainProject.name == name ? mainProject : mainProject.findProject(name)
-            assert project != null, "Incorrect project name: '${name}'."
-            repository.path = project.path
-        }
+        dir = GGit.instance.project.projectDir
+        name = dir.name
     }
 
     void repository(Closure closure) {
@@ -72,8 +62,13 @@ class GitConfig {
             Project project = GGit.instance.project
             delegate.subModules = project.container(GitConfig)
             //copy some settings from parent
-            if (project.ggit.defaultFromParent) {
+            delegate.repository.path = this.repository.path + '/' + delegate.name
+            if (project.ggit.defaultFromParent)
                 ConfigUtils.copyForNullSettings(delegate, this)
+            }
+
+            delegate.repository {
+                path = new File(this.dir, delegate.name)
             }
         }
     }

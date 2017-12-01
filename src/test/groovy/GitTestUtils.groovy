@@ -1,3 +1,5 @@
+import org.eclipse.jgit.api.Git
+
 /*
  * Copyright (c) 2017 Artur Vakhrameev
  *
@@ -20,20 +22,13 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
-
-import javafx.scene.Parent
-
 /**
- *
  * @author Artur Vakhrameev
  */
-final class ConfigUtils {
-
-    static copyForNullSettings(GitConfig to, GitConfig from) {
-        to.repository.branch = to.repository.branch ?: from.repository.branch
-        to.repository.remote = to.repository.remote ?: from.repository.remote
-        to.auth.username = to.auth.username ?: from.auth.username
-        to.auth.password = to.auth.password ?: from.auth.password
+class GitTestUtils {
+    static Git newRepo(String name, File path) {
+        Git.init()
+        .setDirectory(path.createNewFile(name))
+        .set
     }
 }

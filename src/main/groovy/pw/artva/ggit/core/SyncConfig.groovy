@@ -20,27 +20,14 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.tasks
-
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-import pw.artva.ggit.core.GitConfig
-import pw.artva.ggit.operation.OperationFactory
-import pw.artva.ggit.operation.OperationType
+package pw.artva.ggit.core
 
 /**
- * Repositories synchronization task.
- *
  * @author Artur Vakhrameev
  */
-class GitTask extends DefaultTask {
-
-    OperationType operationType
-    GitConfig gitConfig
-
-    @TaskAction
-    void action() {
-        def operation = OperationFactory.instance.create(operationType, gitConfig, false)
-        operation.execute()
-    }
+class SyncConfig {
+    boolean allowRepoClone = true
+    boolean allowRemoteAdd = true
+    boolean allowUrlRewrite = true
+    boolean allowCheckout = true
 }

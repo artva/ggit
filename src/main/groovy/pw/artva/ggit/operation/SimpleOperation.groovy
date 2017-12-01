@@ -30,29 +30,13 @@ import pw.artva.ggit.core.GitConfig
  */
 abstract class SimpleOperation<T> extends AbstractOperation {
 
-    SimpleOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    SimpleOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
     void execute() {
-        if (chain) {
-            def commands = [command(gitConfig)]
-            fillChildren(commands, gitConfig)
-            commands.each {it.call()}
-        } else {
-            command(gitConfig).call()
-        }
-    }
-
-    protected void fillChildren(List<GitCommand<T>> commands, GitConfig config) {
-        //adds children recursively
-        config.subModules.all {
-            commands.add(command(it))
-            it.subModules.all {
-                fillChildren(commands, it)
-            }
-        }
+        command(gitConfig).call()
     }
 
     protected abstract GitCommand<T> command(GitConfig config)

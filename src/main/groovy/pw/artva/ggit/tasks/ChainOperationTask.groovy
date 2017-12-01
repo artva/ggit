@@ -20,20 +20,29 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.tasks
 
-import javafx.scene.Parent
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
+import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.operation.OperationType
 
 /**
- *
  * @author Artur Vakhrameev
  */
-final class ConfigUtils {
+class ChainOperationTask extends AbstractOperationTask {
 
-    static copyForNullSettings(GitConfig to, GitConfig from) {
-        to.repository.branch = to.repository.branch ?: from.repository.branch
-        to.repository.remote = to.repository.remote ?: from.repository.remote
-        to.auth.username = to.auth.username ?: from.auth.username
-        to.auth.password = to.auth.password ?: from.auth.password
+    @Override
+    @TaskAction
+    void action() {
+        chainExecute(gitConfig)
+    }
+
+    private void chainExecute(GitConfig config) {
+        config.subModules.all {
+            chainExecute(it)
+        }
+        def operation = buildOperation(config)
+        operation.execute()
     }
 }

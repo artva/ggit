@@ -32,15 +32,13 @@ import pw.artva.ggit.core.GitConfig
  */
 class CheckoutOperation extends SimpleOperation {
 
-    CheckoutOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    CheckoutOperation(GitConfig gitConfig) {
+        super(gitConfig)
     }
 
     @Override
     protected GitCommand command(GitConfig config) {
-        def dir = GitUtils.getProjectDirByName(config.name)
-
-        return Git.open(dir).checkout()
+        return Git.open(config.repository.dir).checkout()
                 .setCreateBranch(true)
                 .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
                 .setName(config.branch)

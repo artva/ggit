@@ -30,4 +30,8 @@ class GitRepository {
     String path = ''
     String remote = 'origin'
     String remoteUrl = ''
+
+    File getDir() {
+        return new File(path)
+    }
 }
