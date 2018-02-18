@@ -2,7 +2,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import pw.artva.ggit.PluginInitializer
-import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.config.RepositoryConfig
 import spock.lang.Specification
 
 /*
@@ -50,31 +50,23 @@ class GGPluginTest extends Specification {
         project.pluginManager.apply PluginInitializer
 
         then: 'extension defined'
-        assert project.ggit != null
+        assert project.ggit
 
         when: 'plugin configured'
         //building subproject
-        def subProject = ProjectBuilder.builder()
-                .withName('subProj')
-                .withParent(project)
-                .build()
 
         project.ggit {
-            gitConfig {
-                repository {
-                    branch = branchParam
-                    remote = remoteParam
-                }
+            repo {
+                branch = branchParam
+                remote = remoteParam
                 auth {
                     username = usernameParam
                     password = passwordParam
                 }
                 subModules {
                     subProj {
-                        repository {
-                            branch = subBranchParam
-                            remote = subRemoteParam
-                        }
+                        branch = subBranchParam
+                        remote = subRemoteParam
                         auth {
                             password = subPasswordParam
                         }
@@ -82,19 +74,23 @@ class GGPluginTest extends Specification {
                 }
             }
         }
-        GitConfig result = project?.ggit?.gitConfig
-        GitConfig subModule = result?.subModules?.first()
+        RepositoryConfig result = project?.ggit?.gitRepository
 
         then: 'plugin configuration stores all user settings'
-        assert result
-        assert result?.auth?.username == usernameParam
-        assert result?.auth?.password == passwordParam
-        assert result?.repository?.branch == branchParam
-        assert result?.repository?.remote == remoteParam
+        result
+        result?.path == project.projectDir
+        result?.auth?.username == usernameParam
+        result?.auth?.password == passwordParam
+        result?.branch == branchParam
+        result?.remote == remoteParam
 
-        assert subModule
-        assert subModule?.auth?.username == subUsernameParam
-        assert subModule?.auth?.password == subPasswordParam
+        result?.subModules
+        def subProj = result?.subModules?.findByName('subProj')
+        subProj
+        subProj?.path == new File(result?.path, subProj.name)
+        subProj?.branch == subBranchParam
+        subProj?.remote == subRemoteParam
+        subProj?.auth?.password == subPasswordParam
 
         where:
         usernameParam << ['artva']

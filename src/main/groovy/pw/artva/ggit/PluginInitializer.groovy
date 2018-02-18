@@ -24,7 +24,9 @@ package pw.artva.ggit
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import pw.artva.ggit.core.GGit
+
+import pw.artva.ggit.config.GGit
+import pw.artva.ggit.tasks.SyncTask
 
 /**
  * Plugin starting class.
@@ -35,6 +37,10 @@ class PluginInitializer implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        GGit.instance.init(project)
+        //setup extension
+        project.extensions.add(GGit.EXTENSION_NAME, new GGit(project))
+
+        //setup tasks
+        project.task('gitSync', type: SyncTask)
     }
 }

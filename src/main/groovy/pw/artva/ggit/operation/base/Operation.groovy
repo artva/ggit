@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation
+package pw.artva.ggit.operation.base
 
 /**
  * @author Artur Vakhrameev

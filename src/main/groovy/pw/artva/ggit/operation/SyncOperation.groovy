@@ -22,83 +22,67 @@
 
 package pw.artva.ggit.operation
 
+import groovy.transform.InheritConstructors
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.api.Project
-import pw.artva.ggit.core.GGit
-import pw.artva.ggit.core.GitConfig
-import pw.artva.ggit.core.GitRepository
+import pw.artva.ggit.config.RepositoryConfig
+import pw.artva.ggit.operation.base.AbstractOperation
+
+import javax.inject.Inject
 
 /**
  * @author Artur Vakhrameev
  */
 class SyncOperation extends AbstractOperation {
 
-    private final OperationFactory factory = OperationFactory.instance
-    private final Project mainProject = GGit.instance.project
-
-    SyncOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    @Inject
+    SyncOperation(RepositoryConfig config, Project project) {
+        super(config, project)
     }
 
     @Override
     void execute() {
-        if (chain) {
-            recursiveSync(gitConfig)
-        } else {
-            sync(gitConfig)
+        def path = config.path
+        def pathExists = path.exists() && path.list() != null
+
+        if (!pathExists) {
+            assert ggit.cloneIfNotExists:
+                    "Repository '${config.name}' does not exist and cloning not allowed."
+            new CloneOperation(config, project).run()
         }
-    }
 
-    void recursiveSync(GitConfig config) {
-        sync(config)
-        config.subModules.each {
-            recursiveSync(config)
-        }
-    }
-
-    void sync(GitConfig config) {
-        //get project dir by name
-        def project = mainProject.findProject(config.name)
-        def path = project.projectDir
-
-        if (path.exists() && path.list() != null) {
-            //project directory exist and not empty
-            syncSingleRepo(path, config)
-        } else {
-            assert allowRepoClone: "Repository for project '${config.name}' not exists and cloning not allowed."
-            factory.create(OperationType.CLONE, config, false).execute()
-        }
-    }
-
-    void syncSingleRepo(File path, GitConfig config) {
-        GitRepository repoConfig = config.repository
-        //get repository instance
+        //get config instance
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder()
-        File gitDir = new File("${path.path}/.git")
-        Repository repo = repositoryBuilder.setGitDir(gitDir).build()
+        File gitDir = new File(path, '.git')
+        Repository gitRepo = repositoryBuilder.setGitDir(gitDir).build()
 
-        assert repo.getObjectDatabase().exists() && repo.findRef('HEAD') != null:
-                "Invalid git repository in project '${config.name}'"
+        assert gitRepo.getObjectDatabase().exists() && gitRepo.findRef('HEAD') != null:
+                "Invalid git config '${config.name}'"
 
-        //remote
-        def remoteUrl = repo.config.getString('remote', repoConfig.remote, 'url')
+        //setup remote
+        def remoteUrl = gitRepo.config.getString('remote', config.remote, 'url')
         if (remoteUrl == null) {
-            assert allowRemoteAdd: ""
-            repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
-        } else if (remoteUrl != repoConfig) {
-            assert allowUrlRewrite: ""
-            repo.config.setString('remote', repoConfig.remote, 'url', repoConfig.remoteUrl)
+            assert ggit.remoteAddIfNotExists: ""
+            gitRepo.config.setString('remote', config.remote, 'url', config.remoteUrl)
+        } else if (remoteUrl != config.remoteUrl) {
+            assert ggit.remoteUrlRewrite: ""
+            gitRepo.config.setString('remote', config.remote, 'url', config.remoteUrl)
         }
 
-        //branch
-        if (repo.branch != repoConfig.branch) {
-            assert allowCheckout: "Repository for project ${config.name} " +
-                    "is currentyly on branch '${repo.branch}' and checkout not allowed."
-            factory.create(OperationType.CHECKOUT, config, false).execute()
+        //setup branch
+        if (gitRepo.branch != config.branch) {
+            assert ggit.allowCheckout: "Repository ${config.name} " +
+                    "is currentyly on branch '${gitRepo.branch}' and checkout not allowed."
+            new CheckoutOperation(config, project).execute()
         }
 
         //pull
-        factory.create(OperationType.PULL, config, false).execute()
+        new PullOperation(config, project).execute()
+    }
+
+    @Override
+    protected void logComplete() {
+        log.info "${config.name}: pull operation complete successfully"
     }
 }

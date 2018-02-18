@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Artur Vakhrameev
+ * Copyright (c) 2018 Artur Vakhrameev
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,24 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.config
+
+import org.gradle.api.NamedDomainObjectFactory
 
 /**
- * @author Artur Vakhrameev
+ * Created by Artur Vakhrameev on 10.02.2018.
  */
-class GitRepository {
-    String branch = 'master'
-    String path = ''
-    String remote = 'origin'
-    String remoteUrl = ''
+class RepositoryConfigFactory implements NamedDomainObjectFactory<RepositoryConfig> {
+
+    private final RepositoryConfig parent
+
+    RepositoryConfigFactory(RepositoryConfig parent) {
+        this.parent = parent
+    }
+
+    @Override
+    RepositoryConfig create(String name) {
+        def path = new File(parent.path, name)
+        return new RepositoryConfig(name, parent.project, path)
+    }
 }

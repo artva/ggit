@@ -20,24 +20,35 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.config
+
+import org.gradle.api.Project
 
 /**
  * Main plugin configuration class
  *
  * @author Artur Vakhrameev
  */
-class PluginConfiguration {
-    public static final String EXTENSION_NAME = "ggit"
+class GGit {
+    static final String EXTENSION_NAME = "ggit"
+
+    protected Project project
     boolean defaultFromParent = true
     boolean defaultForProject = true
     boolean cloneIfNotExists = true
-    GitConfig gitConfig
+    boolean remoteAddIfNotExists = true
+    RepositoryConfig repositoryConfig
+    boolean remoteUrlRewrite = true
+    boolean allowCheckout = true
 
-    void gitConfig(Closure closure) {
-        gitConfig = new GitConfig()
-        gitConfig.subModules = GGit.instance.project.container(GitConfig)
-        closure.delegate = gitConfig
+    GGit(Project project) {
+        this.project = project
+        repositoryConfig = new RepositoryConfig(project)
+    }
+
+    void repositories(Closure closure) {
+        closure.delegate = repositoryConfig
         closure()
     }
+
 }

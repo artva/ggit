@@ -20,49 +20,12 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
-
-import org.gradle.api.Project
-import pw.artva.ggit.operation.OperationType
-import pw.artva.ggit.tasks.GitTask
+package pw.artva.ggit.config
 
 /**
- * Main plugin class.
- *
  * @author Artur Vakhrameev
  */
-@Singleton
-final class GGit {
-    private Project project
-    private boolean initialized
-
-    void init(Project project) {
-        if (!initialized) {
-            this.project = project
-            initConfig()
-            addTasks()
-            initialized = true
-        } else {
-            throw new IllegalStateException("GGit instance has been already initialized.")
-        }
-    }
-
-    def initConfig() {
-        //setup extension
-        project.extensions.add(PluginConfiguration.EXTENSION_NAME, PluginConfiguration)
-    }
-
-    def addTasks() {
-        //adding tasks for all operation type
-        OperationType.values().each {
-            project.task("git${it.name}", type: GitTask) {
-                operationType = it
-                gitConfig = project.gitConfig
-            }
-        }
-    }
-
-    Project getProject() {
-        return project
-    }
+class GitAuth {
+    String username = ''
+    String password = ''
 }

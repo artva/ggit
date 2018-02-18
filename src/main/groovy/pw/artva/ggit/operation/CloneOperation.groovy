@@ -22,27 +22,28 @@
 
 package pw.artva.ggit.operation
 
+import groovy.transform.InheritConstructors
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
-import pw.artva.ggit.core.GitConfig
+import pw.artva.ggit.config.RepositoryConfig
+import pw.artva.ggit.operation.base.SimpleTransportOperation
 
 /**
  * @author Artur Vakhrameev
  */
-class CloneOperation extends SimpleAuthorizedOperation {
+@InheritConstructors
+class CloneOperation extends SimpleTransportOperation {
 
-    CloneOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    @Override
+    protected TransportCommand simpleCommand(RepositoryConfig config) {
+        return Git.cloneRepository()
+                .setDirectory(config.path)
+                .setURI(config.remoteUrl)
+                .setBranch(config.branch)
     }
 
     @Override
-    protected TransportCommand createCommand(GitConfig config) {
-        def repo = config.repository
-
-        return Git.cloneRepository()
-                .setDirectory(new File(repo.path))
-                .setURI(repo.remoteUrl)
-                .setBranch(repo.branch)
+    protected void logComplete() {
+        log.info "${config.name}: clone operation complete successfully"
     }
-
 }

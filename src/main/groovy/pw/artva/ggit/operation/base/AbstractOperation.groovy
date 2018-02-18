@@ -20,27 +20,41 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.tasks
+package pw.artva.ggit.operation.base
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-import pw.artva.ggit.core.GitConfig
-import pw.artva.ggit.operation.OperationFactory
-import pw.artva.ggit.operation.OperationType
+import groovy.util.logging.Slf4j
+import org.gradle.api.Project
+import pw.artva.ggit.config.GGit
+import pw.artva.ggit.config.RepositoryConfig
 
 /**
- * Repositories synchronization task.
- *
  * @author Artur Vakhrameev
  */
-class GitTask extends DefaultTask {
+@Slf4j
+abstract class AbstractOperation implements Runnable, Operation {
 
-    OperationType operationType
-    GitConfig gitConfig
+    protected final RepositoryConfig config
+    protected final Project project
+    protected final GGit ggit
 
-    @TaskAction
-    void action() {
-        def operation = OperationFactory.instance.create(operationType, gitConfig, false)
-        operation.execute()
+    protected AbstractOperation(RepositoryConfig config, Project project) {
+        this.config = config
+        this.project = project
+        ggit = project.ggit
     }
+
+    @Override
+    void run() {
+        execute()
+    }
+
+    protected abstract void logComplete()
+
+//    protected void executeChildren(NamedDomainObjectContainer<RepositoryConfig> subModules) {
+//        subModules.all {
+//            execute(it)
+//            executeChildren(it.subModules)
+//        }
+//    }
+
 }

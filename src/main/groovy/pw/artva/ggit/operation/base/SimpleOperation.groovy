@@ -20,18 +20,28 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.core
+package pw.artva.ggit.operation.base
+
+import groovy.transform.InheritConstructors
+import org.eclipse.jgit.api.GitCommand
+import pw.artva.ggit.config.RepositoryConfig
 
 /**
- *
  * @author Artur Vakhrameev
  */
-final class ConfigUtils {
+@InheritConstructors
+abstract class SimpleOperation<T> extends AbstractOperation {
 
-    static copyForNullSettings(GitConfig to, GitConfig from) {
-        to.repository.branch = to.repository.branch ?: from.repository.branch
-        to.repository.remote = to.repository.remote ?: from.repository.remote
-        to.auth.username = to.auth.username ?: from.auth.username
-        to.auth.password = to.auth.password ?: from.auth.password
+    @Override
+    void execute() {
+        command(config).call()
+        logComplete()
     }
+
+    protected GitCommand<T> command(RepositoryConfig config) {
+        simpleCommand(config)
+    }
+
+    protected abstract GitCommand<T> simpleCommand(RepositoryConfig repository)
+
 }

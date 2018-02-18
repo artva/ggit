@@ -20,18 +20,30 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation
+package pw.artva.ggit.operation.base
 
-import groovy.transform.Immutable
-import pw.artva.ggit.core.GitConfig
+import groovy.transform.InheritConstructors
+import org.eclipse.jgit.api.GitCommand
+import org.eclipse.jgit.api.TransportCommand
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import pw.artva.ggit.config.RepositoryConfig
 
 /**
  * @author Artur Vakhrameev
  */
-@Immutable
-abstract class AbstractOperation implements Operation {
+@InheritConstructors
+abstract class SimpleTransportOperation extends SimpleOperation {
 
-    protected GitConfig gitConfig
-    protected boolean chain
+    @Override
+    GitCommand command(RepositoryConfig config) {
+        return Object.command(config)
+                .setCredentialsProvider(httpAuthCredentials(config))
+    }
 
+    private static UsernamePasswordCredentialsProvider httpAuthCredentials(RepositoryConfig config) {
+        def auth = config.auth
+        return new UsernamePasswordCredentialsProvider(auth.username, auth.password)
+    }
+
+    protected abstract TransportCommand simpleCommand(RepositoryConfig config)
 }

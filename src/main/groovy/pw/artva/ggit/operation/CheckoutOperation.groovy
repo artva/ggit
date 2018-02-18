@@ -25,25 +25,33 @@ package pw.artva.ggit.operation
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.GitCommand
-import pw.artva.ggit.core.GitConfig
+import org.gradle.api.Project
+import pw.artva.ggit.config.RepositoryConfig
+import pw.artva.ggit.operation.base.SimpleOperation
+
+import javax.inject.Inject
 
 /**
  * @author Artur Vakhrameev
  */
 class CheckoutOperation extends SimpleOperation {
 
-    CheckoutOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    @Inject
+    CheckoutOperation(RepositoryConfig config, Project project) {
+        super(config, project)
     }
 
     @Override
-    protected GitCommand command(GitConfig config) {
-        def dir = GitUtils.getProjectDirByName(config.name)
-
-        return Git.open(dir).checkout()
+    protected GitCommand simpleCommand(RepositoryConfig config) {
+        return Git.open(config.path).checkout()
                 .setCreateBranch(true)
                 .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
                 .setName(config.branch)
                 .setStartPoint("${config.remote}/${config.branch}")
+    }
+
+    @Override
+    protected void logComplete() {
+        log.info "${config.name}: checkout operation complete successfully"
     }
 }

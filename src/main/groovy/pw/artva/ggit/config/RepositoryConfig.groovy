@@ -20,40 +20,42 @@
  * SOFTWARE.
  */
 
-package pw.artva.ggit.operation
+package pw.artva.ggit.config
 
-import org.eclipse.jgit.api.GitCommand
-import pw.artva.ggit.core.GitConfig
+import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Project
 
 /**
  * @author Artur Vakhrameev
  */
-abstract class SimpleOperation<T> extends AbstractOperation {
+class RepositoryConfig {
 
-    SimpleOperation(GitConfig gitConfig, boolean chain) {
-        super(gitConfig, chain)
+    String name
+    final GitAuth auth = new GitAuth()
+    final Project project
+    String branch = 'master'
+    final File path
+    String remote = 'origin'
+    String remoteUrl = ''
+    final NamedDomainObjectContainer<RepositoryConfig> subModules
+
+    RepositoryConfig(Project project) {
+        this('repo', project, project.projectDir)
     }
 
-    @Override
-    void execute() {
-        if (chain) {
-            def commands = [command(gitConfig)]
-            fillChildren(commands, gitConfig)
-            commands.each {it.call()}
-        } else {
-            command(gitConfig).call()
-        }
+    RepositoryConfig(String name, Project project, File path) {
+        this.name = name
+        this.project = project
+        this.path = path
+        this.subModules = project.container(RepositoryConfig, new RepositoryConfigFactory(this))
     }
 
-    protected void fillChildren(List<GitCommand<T>> commands, GitConfig config) {
-        //adds children recursively
-        config.subModules.all {
-            commands.add(command(it))
-            it.subModules.all {
-                fillChildren(commands, it)
-            }
-        }
+    void auth(Closure closure) {
+        closure.delegate = auth
+        closure()
     }
 
-    protected abstract GitCommand<T> command(GitConfig config)
+    void subModules(Closure closure) {
+        subModules.configure(closure)
+    }
 }
